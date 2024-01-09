@@ -30,10 +30,14 @@ public class Calcolatrice {
     private JPanel risultato;
     private JRadioButton rdbNormale;
     private JRadioButton rdbRPN;
+    private String username;
+    private database databs;
 
 
+    public Calcolatrice(String username) {
 
-    public Calcolatrice() {
+        this.username=username;
+        databs = new database("127.0.0.1", "dbcalcolatrice","root","");
 
         // creo gli eventi per tutti gli oggetti presenti nel JPanel
         btnClear.addActionListener(new ActionListener() {
@@ -126,7 +130,13 @@ public class Calcolatrice {
             public void actionPerformed(ActionEvent e) {
                 PressioneOperatore("=");
 
-               labelrisultato.setText(CalcolaRPN(TraduciInRPN(labelStampa.getText().trim()).toString().trim()));
+               //labelrisultato.setText(CalcolaRPN(TraduciInRPN(labelStampa.getText().trim()).toString().trim()));
+
+                String risultato = CalcolaRPN(TraduciInRPN(labelStampa.getText().trim()).toString().trim());
+                labelrisultato.setText(risultato);
+
+                // Salva il risultato nel database
+                databs.salvaRisultato(username, risultato);
             }
         });
 
@@ -199,14 +209,14 @@ public class Calcolatrice {
 
     }
 
-    public static void main(String[] args) {
+    public static void main(String username) {
         JFrame frame = new JFrame("Calcolatrice");
-        frame.setContentPane(new Calcolatrice().JPanel);
+        frame.setContentPane(new Calcolatrice(username).JPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setVisible(true);
-
     }
+
 
     private void PressionePulsanteNumerico(String numero) {
         // Aggiungo il testo alla label
@@ -242,7 +252,7 @@ public class Calcolatrice {
                 stack_operatori.pop();
             } else if (elemento == '+' || elemento == '-') { // gestico la precedenza dei segni
                 while (!stack_operatori.isEmpty() && (stack_operatori.peek() == '+' || stack_operatori.peek() == '-' || stack_operatori.peek() == '*' || stack_operatori.peek() == '/')) {
-                    notazione_rpn.append(stack_operatori.pop()).append(" ");
+                                notazione_rpn.append(stack_operatori.pop()).append(" ");
                 }
                 stack_operatori.push(elemento);
             } else if (elemento == '*' || elemento == '/') {
@@ -309,4 +319,8 @@ public class Calcolatrice {
         }
     }
 
+
+
+    public static class DataBase {
+    }
 }
